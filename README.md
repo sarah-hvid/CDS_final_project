@@ -26,6 +26,7 @@ Python:
 -	Pandas (1.0.5)
 -	Fuzzywuzzy (0.18.0)
 -	Glob2 (0.7)
+-	Re (2.2.1)
 -	Ast (python 3.6)
 -	Os (python 3.6)
 

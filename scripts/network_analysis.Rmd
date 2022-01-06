@@ -1,0 +1,141 @@
+---
+title: "Script 4"
+author: "Sarah Hvid Andersen"
+date: "07/01/2022"
+output: html_document
+---
+
+This script creates two networks. One for analysis, and one for visualization. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Loading packages:
+
+```{r}
+pacman::p_load(tidyverse, igraph, visNetwork, networkD3, data.table)
+```
+
+We then load the 'data_links.csv' file after the preprocessing in OpenRefine has been applid. 
+Change the working directory to the csv folder within the strings of the first line of code. 
+Some of the gathered entities were not names and were altered to an 'x' in the dataframe. These should be removed.
+
+```{r}
+setwd("C:/Users/Sarah/Desktop/Bachelor/Ibsen/ibsen_network/data/csv")
+
+links <- read_csv('OR_data_links.csv')
+
+links <- links %>% filter(source != 'x') %>% filter(target != 'x')
+```
+
+Now, we can create a dataframe of the nodes by getting each unique name in the dataframe. 
+
+```{r}
+nodes <- unique(links$source) %>% as.data.frame()
+nodes <- nodes %>% rowid_to_column("id") %>% rename('label' = '.')
+```
+
+Then, we can calculate the weights of the network.
+
+```{r}
+per_route <- links %>%  
+  group_by(source, target) %>%
+  summarise(weight = n()) %>% 
+  ungroup()
+
+```
+
+And from the weights, we create the dataframe of the edges.
+
+```{r}
+edges <- per_route %>% 
+  left_join(nodes, by = c("source" = "label")) %>% 
+  rename(from = id)
+
+edges <- edges %>% 
+  left_join(nodes, by = c("target" = "label")) %>% 
+  rename(to = id)
+
+edges <- select(edges, from, to, weight)
+
+```
+
+Now we can create the first network using the Igraph package. 
+
+```{r}
+g3 <- igraph::graph_from_data_frame(d = edges, vertices = nodes, directed = FALSE)
+g3 <- simplify(g3)
+g3
+```
+
+From the network, we calculate different centrality measures. In a nutshell, a measure of centrality is an index that assigns a numeric values to the nodes of the network. The higher the value, the more central the node (A more thorough introduction is given in the extended tutorial).
+
+
+```{r}
+cent <- tibble(nodes=1:vcount(g3))
+cent$id <- nodes$label
+
+
+cent$degree <- igraph::degree(g3)
+cent$betweenness <- igraph::betweenness(g3)
+cent$closeness <- igraph::closeness(g3)
+cent$eigen <- igraph::eigen_centrality(g3)$vector
+cent$subgraph <- igraph::subgraph_centrality(g3)
+```
+
+
+degree:
+The degree of a vertex is its most basic structural property, the number of its adjacent edges.
+
+betweenness:
+The vertex and edge betweenness are (roughly) defined by the number of geodesics (shortest paths) going through a vertex or an edge.
+
+closeness:
+Closeness centrality measures how many steps is required to access every other vertex from a given vertex.
+
+
+Then we can write a function that creates a barplot illustrating the different measures. 
+
+```{r}
+
+bar_plot <- function(dataframe, x_var, y_var, sub_title) {
+  cent_s <- dataframe %>%
+    slice_max({{y_var}}, n = 15) %>% 
+    arrange(desc({{y_var}}))
+  
+  ggplot(cent_s, aes(x = {{x_var}}, y = {{y_var}}, color = {{x_var}}))+
+    geom_bar(stat = 'identity', fill = 'grey') + 
+    scale_x_discrete(limits = cent_s$id) +
+    theme(legend.position = 'none') +
+    ggtitle('Network Analysis', subtitle = sub_title)
+  
+}
+
+bar_plot(cent, id, degree, 'degree')
+bar_plot(cent, id, betweenness, 'betweenness')
+bar_plot(cent, id, closeness, 'closeness')
+bar_plot(cent, id, eigen, 'eigen')
+bar_plot(cent, id, subgraph, 'subgraph')
+```
+
+We also want to create a network for visualization purposes. The NetworkD3 package is useful for this, and it also allows interactivty. It requires a slightly different setup, starting from 0 instad of 1. 
+
+```{r}
+nodes_d3 <- mutate(nodes, id = id - 1)
+edges_d3 <- mutate(edges, from = from - 1, to = to - 1)
+```
+
+With the setup done, we can now create the network. It includes interactive labels. Hovering over a node, will show the name of the node. You can also zoom in and out, focusing on different parts of the network.
+
+```{r}
+forceNetwork(Links = edges_d3, Nodes = nodes_d3, Source = "from", Target = "to", 
+             NodeID = "label", Group = "id", Value = "weight", 
+             opacity = 1, fontSize = 18, zoom = TRUE)
+```
+
+References:
+
+schochastics. (2018, December 7). Network Centrality in R: An Introduction | R-bloggers. https://www.r-bloggers.com/2018/12/network-centrality-in-r-an-introduction/
+
+Ognyanova, K. (2021, June 26). Static and dynamic network visualization with R. Katya Ognyanova. https://kateto.net/network-visualization/

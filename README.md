@@ -7,6 +7,7 @@ This repository contains all data and scripts used in my final project.
 - The csv folder contains the csv files generated through the code. 
 - The data folder contains the raw data in XML version and the preprocessed text data. 
 
+To rerun code, create an empty folder called 'ibsen_network'. Place the scripts and data folder within this folder. Then, place the csv folder within the data folder. The directory setup should now be the same as when the code was created.
 
 # Software metadata
 S1  Computing platform / Operating System	

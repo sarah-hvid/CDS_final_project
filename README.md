@@ -3,9 +3,10 @@ Sarah Hvid Andersen (au644610/201910230)
 # Introduction to Cultural Data Science - Final project
 This repository contains all data and scripts used in my final project. 
 
+- The data folder contains the raw data in XML version and the preprocessed text data. 
 - The scripts folder contains all code from both Python, OpenRefine and RStudio. 
 - The csv folder contains the csv files generated through the code. 
-- The data folder contains the raw data in XML version and the preprocessed text data. 
+- The video_presentation folder contains a PDF of the video presentations metadata and a link to the video itself.
 
 To rerun code, create an empty folder called 'ibsen_network'. Place the scripts and data folder within this folder. Then, place the csv folder within the data folder. The directory setup should now be the same as when the code was created.
 

@@ -3,7 +3,7 @@ Sarah Hvid Andersen (au644610/201910230)
 # Introduction to Cultural Data Science - Final project
 This repository contains all data and scripts used in my final project. 
 
-- The data folder contains the raw data in XML version and the preprocessed text data. 
+- The zipped data folder contains the raw data in XML version and the preprocessed data in txt version. 
 - The scripts folder contains all code from both Python, OpenRefine and RStudio. 
 - The csv folder contains the csv files generated through the code. 
 - The video_presentation folder contains a PDF of the video presentations metadata and a link to the video itself.
